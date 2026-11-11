@@ -388,7 +388,12 @@ static TCGv get_gprh(DisasContext *ctx, int reg_num)
 
 static TCGv dest_gpr(DisasContext *ctx, int reg_num)
 {
-    if (reg_num == 0 || get_olen(ctx) < TARGET_LONG_BITS) {
+    /*
+     * Andes stack protection checks sp in gen_set_gpr(). A temporary keeps sp
+     * unchanged when the check raises, as the exception is precise.
+     */
+    if (reg_num == 0 || get_olen(ctx) < TARGET_LONG_BITS ||
+        (reg_num == xSP && ctx->cfg_ptr->ext_XAndesV5Ops)) {
         return tcg_temp_new();
     }
     return cpu_gpr[reg_num];
